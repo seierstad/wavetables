@@ -1,7 +1,7 @@
 "use strict";
 
 import { floatToPCM } from "wav-recorder-node";
-import { isValidWaveData } from "../../index.js";
+import { flattenWavetable, isValidWaveData } from "../../index.js";
 import * as BLOFELD from "./constants.js";
 
 const mask7bits = 0x7F;
@@ -70,7 +70,7 @@ const waldorfBlofeldWave = (output, input, name, slot = BLOFELD.DEFAULT.SLOT, wa
     const checkStart = index;
 
     // Data part of sysex message
-    result[index] = FORMAT;
+    result[index] = BLOFELD.SYSEX.FORMAT;
     index += 1;
 
     // wave data
