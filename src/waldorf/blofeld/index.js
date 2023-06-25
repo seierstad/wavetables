@@ -2,18 +2,19 @@
 
 import { floatToPCM } from "wav-recorder-node";
 import { flattenWavetable, isValidWaveData } from "../../index.js";
-import * as BLOFELD from "./constants.js";
+import {MANUFACTURER_ID as WALDORF_ID} from "../constants.js";
+import {DEFAULT, PARAMETER, SYSEX, WAVE_COUNT, WAVE_LENGTH} from "./constants.js";
 
 const mask7bits = 0x7F;
 
 
 // check length and legal characters
 const isValidName = (name) => name.length <= 14 && !Array.from(name).some(l => l.charCodeAt() < 0x20 || l.charCodeAt() > 0x7F);
-const isValidSlot = (slot) => typeof slot === "number" && slot >= BLOFELD.PARAMETER.SLOT.MIN && slot <= BLOFELD.PARAMETER.SLOT.MAX;
-const isValidWavetable = wavetable => Array.isArray(wavetable) && wavetable.length <= BLOFELD.WAVE_COUNT && wavetable.every(isValidWaveData(BLOFELD.WAVE_LENGTH));
+const isValidSlot = (slot) => typeof slot === "number" && slot >= PARAMETER.SLOT.MIN && slot <= PARAMETER.SLOT.MAX;
+const isValidWavetable = wavetable => Array.isArray(wavetable) && wavetable.length <= WAVE_COUNT && wavetable.every(isValidWaveData(WAVE_LENGTH));
 
 
-const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber = 0, deviceId = BLOFELD.DEFAULT.DEVICE_ID, output = null) => {
+const waldorfBlofeldWave = (input, name, slot = DEFAULT.SLOT, waveNumber = 0, deviceId = DEFAULT.DEVICE_ID, output = null) => {
 
     /*
         parameters:
@@ -43,15 +44,15 @@ const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber
 
     let index = 0;
 
-    result[index] = BLOFELD.SYSEX.START;
+    result[index] = SYSEX.START;
     index += 1;
-    result[index] = BLOFELD.SYSEX.WALDORF_ID;
+    result[index] = WALDORF_ID;
     index += 1;
-    result[index] = BLOFELD.SYSEX.BLOFELD_ID;
+    result[index] = SYSEX.BLOFELD_ID;
     index += 1;
     result[index] = deviceId; // device number, 0x7F = broadcast
     index += 1;
-    result[index] = BLOFELD.SYSEX.WAVETABLE_DUMP; // message id
+    result[index] = SYSEX.WAVETABLE_DUMP; // message id
     index += 1;
     result[index] = slot & mask7bits; // location high byte
     index += 1;
@@ -61,7 +62,7 @@ const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber
     const checkStart = index;
 
     // Data part of sysex message
-    result[index] = BLOFELD.SYSEX.FORMAT;
+    result[index] = SYSEX.FORMAT;
     index += 1;
 
     // wave data
@@ -78,9 +79,9 @@ const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber
     });
 
     // reserved bytes
-    result[index] = BLOFELD.SYSEX.RESERVED;
+    result[index] = SYSEX.RESERVED;
     index += 1;
-    result[index] = BLOFELD.SYSEX.RESERVED;
+    result[index] = SYSEX.RESERVED;
     index += 1;
 
     const checkEnd = index;
@@ -88,13 +89,13 @@ const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber
     // checksum
     result[index] = result.subarray(checkStart, checkEnd).reduce((acc, value) => acc + value) & mask7bits;
     index += 1;
-    result[index] = BLOFELD.SYSEX.END;
+    result[index] = SYSEX.END;
 
     return result;
 };
 
 
-const waldorfBlofeldWavetable = (input = [[],[]], name = BLOFELD.DEFAULT.NAME, slot = BLOFELD.DEFAULT.SLOT, deviceId = BLOFELD.DEFAULT.DEVICE_ID, output = null) => {
+const waldorfBlofeldWavetable = (input = [[],[]], name = DEFAULT.NAME, slot = DEFAULT.SLOT, deviceId = DEFAULT.DEVICE_ID, output = null) => {
     /*
         parameters:
         -----------
@@ -127,7 +128,7 @@ const waldorfBlofeldWavetable = (input = [[],[]], name = BLOFELD.DEFAULT.NAME, s
 
 
 // create blob for inclusion as download link href
-const waldorfBlofeldSysexBlob = (wavetable, name = BLOFELD.DEFAULT.NAME, slot = BLOFELD.DEFAULT.SLOT, deviceId = BLOFELD.DEFAULT.DEVICE_ID) => URL.createObjectURL(new Blob(
+const waldorfBlofeldSysexBlob = (wavetable, name = DEFAULT.NAME, slot = DEFAULT.SLOT, deviceId = DEFAULT.DEVICE_ID) => URL.createObjectURL(new Blob(
     [waldorfBlofeldWavetable(flattenWavetable(wavetable), name, slot, deviceId)],
     {type: "application/midi"}
 ));
@@ -139,5 +140,9 @@ export {
     isValidWavetable,
     waldorfBlofeldSysexBlob,
     waldorfBlofeldWave,
-    waldorfBlofeldWavetable
+    waldorfBlofeldWavetable,
+    DEFAULT,
+    PARAMETER,
+    WAVE_COUNT,
+    WAVE_LENGTH
 };
