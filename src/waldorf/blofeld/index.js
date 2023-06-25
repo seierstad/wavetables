@@ -3,7 +3,7 @@
 import { floatToPCM } from "wav-recorder-node";
 import { flattenWavetable, isValidWaveData } from "../../index.js";
 import {MANUFACTURER_ID as WALDORF_ID} from "../constants.js";
-import {DEFAULT, PARAMETER, SYSEX, WAVE_COUNT, WAVE_LENGTH} from "./constants.js";
+import {DEFAULT, PARAMETER, SYSEX, WAVE_COUNT, WAVE_LENGTH, RESOLUTION, LITTLE_ENDIAN, BITS_PR_BYTE} from "./constants.js";
 
 const mask7bits = 0x7F;
 
@@ -69,7 +69,7 @@ const waldorfBlofeldWave = (input, name, slot = DEFAULT.SLOT, waveNumber = 0, de
 
     const dv = new DataView(result.buffer, result.byteOffset + index, 128 * 3);
 
-    floatToPCM(dv, 0, input, 21, false, 7);
+    floatToPCM(dv, 0, input, RESOLUTION, LITTLE_ENDIAN, BITS_PR_BYTE);
     index += (128 * 3);
 
     // name

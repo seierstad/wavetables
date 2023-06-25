@@ -1,5 +1,9 @@
 import {MANUFACTURER_ID as WALDORF_ID} from "../index.js";
 
+const RESOLUTION = 21;
+const LITTLE_ENDIAN = false;
+const BITS_PR_BYTE = 7;
+
 const SLOT = {
     MIN: 80,
     MAX: 118
@@ -179,5 +183,8 @@ export {
     PARAMETER,
     DEFAULT,
     WAVE_LENGTH,
-    WAVE_COUNT
+    WAVE_COUNT,
+    RESOLUTION,
+    LITTLE_ENDIAN,
+    BITS_PR_BYTE
 };
