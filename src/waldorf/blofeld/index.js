@@ -12,16 +12,8 @@ const isValidName = (name) => name.length <= 14 && !Array.from(name).some(l => l
 const isValidSlot = (slot) => typeof slot === "number" && slot >= BLOFELD.PARAMETER.SLOT.MIN && slot <= BLOFELD.PARAMETER.SLOT.MAX;
 const isValidWavetable = wavetable => Array.isArray(wavetable) && wavetable.length <= BLOFELD.WAVE_COUNT && wavetable.every(isValidWaveData(BLOFELD.WAVE_LENGTH));
 
-// create blob for inclusion as download link href
-const waldorfBlofeldSysexBlob = (wavetable, name, slot, deviceId) => URL.createObjectURL(
-    new Blob(
-        [waldorfBlofeldWavetable(null, flattenWavetable(wavetable), name, slot, deviceId)],
-        {type: "application/midi"}
-    )
-);
 
-
-const waldorfBlofeldWave = (output, input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber = 0, deviceId = BLOFELD.DEFAULT.DEVICE_ID) => {
+const waldorfBlofeldWave = (input, name, slot = BLOFELD.DEFAULT.SLOT, waveNumber = 0, deviceId = BLOFELD.DEFAULT.DEVICE_ID, output = null) => {
 
     /*
         parameters:
@@ -50,7 +42,6 @@ const waldorfBlofeldWave = (output, input, name, slot = BLOFELD.DEFAULT.SLOT, wa
 
 
     let index = 0;
-
 
     result[index] = BLOFELD.SYSEX.START;
     index += 1;
@@ -103,7 +94,7 @@ const waldorfBlofeldWave = (output, input, name, slot = BLOFELD.DEFAULT.SLOT, wa
 };
 
 
-const waldorfBlofeldWavetable = (output, input = [[],[]], name = BLOFELD.DEFAULT.NAME, slot = BLOFELD.DEFAULT.SLOT, deviceId = BLOFELD.DEFAULT.DEVICE_ID) => {
+const waldorfBlofeldWavetable = (input = [[],[]], name = BLOFELD.DEFAULT.NAME, slot = BLOFELD.DEFAULT.SLOT, deviceId = BLOFELD.DEFAULT.DEVICE_ID, output = null) => {
     /*
         parameters:
         -----------
@@ -129,10 +120,17 @@ const waldorfBlofeldWavetable = (output, input = [[],[]], name = BLOFELD.DEFAULT
     }
 
     for (let i = 0; i < 64; i += 1) {
-        waldorfBlofeldWave(result.subarray(i * 410, (i + 1) * 410), input.subarray(i * 128, (i + 1) * 128), name, slot, i, deviceId);
+        waldorfBlofeldWave(input.subarray(i * 128, (i + 1) * 128), name, slot, i, deviceId, result.subarray(i * 410, (i + 1) * 410));
     }
     return result;
 };
+
+
+// create blob for inclusion as download link href
+const waldorfBlofeldSysexBlob = (wavetable, name = BLOFELD.DEFAULT.NAME, slot = BLOFELD.DEFAULT.SLOT, deviceId = BLOFELD.DEFAULT.DEVICE_ID) => URL.createObjectURL(new Blob(
+    [waldorfBlofeldWavetable(flattenWavetable(wavetable), name, slot, deviceId)],
+    {type: "application/midi"}
+));
 
 
 export {
