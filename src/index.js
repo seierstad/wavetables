@@ -1,5 +1,6 @@
 import {encodeWAV} from "wav-recorder-node";
 
+import * as DEFAULT from "./defaults.js";
 import * as WALDORF from "./waldorf/index.js";
 
 
@@ -13,7 +14,7 @@ const flattenWavetable = (wavetable = [[]]) => {
     return result;
 };
 
-const wavBlob = (wavetable, resolution, samplerate, float) => URL.createObjectURL(
+const wavBlob = (wavetable, resolution = DEFAULT.RESOLUTION, samplerate = DEFAULT.SAMPLE_RATE, float = false) => URL.createObjectURL(
     new Blob(
         [encodeWAV([flattenWavetable(wavetable)], samplerate, float, resolution)],
         {type: "audio/wav"}
